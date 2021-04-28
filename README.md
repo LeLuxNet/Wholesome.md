@@ -25,13 +25,26 @@ remark()
 ### JSX
 
 ```tsx
+import { createElement, ReactElement } from "react";
+import ReactDOM from "react-dom";
+import rehype2react from "rehype-react";
 import remark from "remark";
-import remark2react from "remark-react";
+import remark2rehype from "remark-rehype";
 import wmd from "wholesome.md";
 
-<div>
-  {remark().use(wmd).use(remark2react).processSync("Hello, ^(World)!").result}
-</div>;
+const mark = remark()
+  .use(wmd)
+  .use(remark2rehype)
+  .use(rehype2react, { createElement });
+
+function Markdown({ content }: { content: string }) {
+  return mark.processSync(content).result as ReactElement;
+}
+
+ReactDOM.render(
+  <Markdown content="Hello, ^(World)!" />,
+  document.querySelector("#root")
+);
 ```
 
 ### Plain
@@ -56,7 +69,8 @@ remark()
 
 ```ts
 remark().use(wmd, {
-  replaceSpoiler: true, // Replace spoilers with █. Useful for plain text 'meta' tags or notifications
+  // Replace spoilers with █. Useful for <meta> tags or notifications
+  replaceSpoiler: true,
 
   userURL: "https://old.reddit.com/user/{}",
   subredditURL: "https://old.reddit.com/r/{}",
