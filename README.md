@@ -56,6 +56,8 @@ remark()
 
 ```ts
 remark().use(wmd, {
+  replaceSpoiler: true, // Replace spoilers with █. Useful for plain text 'meta' tags or notifications
+
   userURL: "https://old.reddit.com/user/{}",
   subredditURL: "https://old.reddit.com/r/{}",
 });

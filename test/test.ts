@@ -5,7 +5,11 @@ import remark from "remark";
 import remark2rehype from "remark-rehype";
 import wholesome from "../src";
 
-const u = remark().use(wholesome).use(remark2rehype).use(html);
+const u = remark()
+  .use(wholesome, { hideSpoiler: true })
+  .use(remark2rehype)
+  .use(html);
+
 const p = (text: string) =>
   new Promise<string>((resolve, reject) =>
     u.process(text, (err: Error | null, file: any) => {

@@ -5,27 +5,34 @@ const mentionRegex = /\/?([ru])\/([^ ]+)/g;
 const spoilerRegex = />!(.*)!</g;
 const superscriptRegex = /\^(?:(?:\(([^)]+)\))|([^ ]*))/g;
 
-export default (userURL: string, subredditURL: string) => (tree: Node) => {
-  const replaceSuperscript = (_: string, value1?: string, value2?: string) => ({
+export default (userURL: string, subredditURL: string, rSpoiler: boolean) => (
+  tree: Node
+) => {
+  const replaceSuperscript = (...all: string[]) => ({
     type: "sup",
-    children: [{ type: "text", value: (value1 ?? value2)! }],
+    children: [{ type: "text", value: (all[1] ?? all[2])! }],
     data: { hName: "sup" },
   });
 
-  const replaceSpoiler = (_: string, value: string) => ({
+  const replaceSpoiler = (...all: string[]) => ({
     type: "spoiler",
-    children: [{ type: "text", value }],
+    children: [
+      {
+        type: "text",
+        value: rSpoiler ? "█".repeat(all[1].length) : all[1],
+      },
+    ],
     data: {
       hName: "span",
       hProperties: { className: "spoiler" },
     },
   });
 
-  const replaceMention = (text: string, type: "r" | "u", value: string) => ({
+  const replaceMention = (...all: string[]) => ({
     type: "link",
     title: null,
-    url: (type === "r" ? subredditURL : userURL).replace(/\{\}/g, value),
-    children: [{ type: "text", value: text }],
+    url: (all[1] === "r" ? subredditURL : userURL).replace(/\{\}/g, all[2]),
+    children: [{ type: "text", value: all[0] }],
   });
 
   findAndReplace(
