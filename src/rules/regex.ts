@@ -1,18 +1,28 @@
 import findAndReplace from "mdast-util-find-and-replace";
 import { Node } from "unist";
+import visit, { Visitor } from "unist-util-visit";
 
 const mentionRegex = /\/?([ru])\/([^ ]+)/g;
 const spoilerRegex = />!(.*)!</g;
-const superscriptRegex = /\^(?:(?:\(([^)]+)\))|([^ ]*))/g;
 
 export default (userURL: string, subredditURL: string, rSpoiler: boolean) => (
   tree: Node
 ) => {
-  const replaceSuperscript = (...all: string[]) => ({
-    type: "sup",
-    children: [{ type: "text", value: (all[1] ?? all[2])! }],
-    data: { hName: "sup" },
-  });
+  const replaceBlockquote: Visitor<Node> = (node, index, parent) => {
+    const paragraph = (node.children as Node[])[0];
+    if (paragraph.type !== "paragraph") return;
+
+    const text = (paragraph.children as Node[])[0];
+    if (text.type !== "text") return;
+
+    const val = (text as any).value as string;
+
+    if (!val.startsWith("!")) return;
+    if (!val.includes("!<")) return;
+
+    text.value = ">" + text.value;
+    parent!.children[index] = paragraph;
+  };
 
   const replaceSpoiler = (...all: string[]) => ({
     type: "spoiler",
@@ -35,11 +45,12 @@ export default (userURL: string, subredditURL: string, rSpoiler: boolean) => (
     children: [{ type: "text", value: all[0] }],
   });
 
+  visit(tree, "blockquote", replaceBlockquote);
+
   findAndReplace(
     tree,
     [
       [spoilerRegex, replaceSpoiler],
-      [superscriptRegex, replaceSuperscript],
       [mentionRegex, replaceMention],
     ],
     {

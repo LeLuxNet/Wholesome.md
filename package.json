@@ -1,11 +1,10 @@
 {
   "name": "wholesome.md",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.2",
+  "description": "A markdown parser for Reddit-flavored Markdown",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "start": "nodejs dist/index.js",
     "build": "tsc",
     "prepare": "npm run build",
     "test": "jest"
@@ -49,5 +48,9 @@
     "modulePathIgnorePatterns": [
       "dist"
     ]
-  }
+  },
+  "keywords": [
+    "reddit",
+    "markdown"
+  ]
 }
