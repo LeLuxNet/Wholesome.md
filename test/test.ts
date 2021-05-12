@@ -1,5 +1,5 @@
 import { readdirSync } from "fs";
-import { readFile } from "fs/promises";
+import { readFile as origReadFile } from "fs/promises";
 import { join } from "path";
 import html from "rehype-stringify";
 import remark from "remark";
@@ -19,17 +19,17 @@ const p = (text: string) =>
     })
   );
 
+const readFile = (path: string) =>
+  origReadFile(path, "utf-8").then((s) => s.replace(/\r\n/g, "\n"));
+
 readdirSync(join(__dirname, "files")).forEach((f) => {
   it(`should support ${f}`, async () => {
     const path = join(__dirname, "files", f);
 
-    const input = await readFile(join(path, "in.md"), "utf-8");
-    const output = await readFile(join(path, "out.html"), "utf-8");
+    const input = await readFile(join(path, "in.md"));
+    const output = await readFile(join(path, "out.html"));
 
     const outputExp = await p(input);
-
-    // await writeFile(join(path, "out2.html"), outputExp);
-    // await unlink(join(path, "out2.html")).catch(() => {});
 
     expect(outputExp).toBe(output);
   });
